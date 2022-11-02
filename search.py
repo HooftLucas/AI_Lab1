@@ -223,9 +223,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     mazePath = {}
     mazeCost = {}
     nextStep = 0
-
     StatePQ.push((problem.getStartState(), ' ', 0), 0)
-
     while not goalReached:
         xy, dir, cost = StatePQ.pop()
         alreadyVisited[xy] = dir #xy get the next direction
@@ -247,10 +245,6 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         nextStep = currentStep
     goal.reverse() #reverse to get the right sequence
     return goal
-
-
-
-
 # Abbreviations
 bfs = breadthFirstSearch
 dfs = depthFirstSearch

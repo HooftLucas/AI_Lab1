@@ -295,8 +295,7 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
-
+        return self.startState
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
