@@ -176,35 +176,26 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of the least total cost first."""
     "*** YOUR CODE HERE ***"
-    goal: list = []
+    StatePQ = problem.getStartState()
+    Goal: list = []
     goalReached = False
-    StatePQ = util.PriorityQueue()  # queue heeft de maze ((x,y), direction, cost), priority)
-    alreadyVisited = {}  # kijken welke (xy) al bezocht zijn
-    mazepath = {}  # kijken welke route gelinkt is aan de positie
-    mazecost = {}
-    nextstep = 0
-    StatePQ.push((problem.getStartState(), '', 0), 0)
-    while not goalReached:
-        xy, dir, cost = StatePQ.pop()
-        alreadyVisited[xy] = dir  # set the direction where he was in the list
-        if problem.isGoalState(xy):  # control if the destination is the goal
-            nextstep = xy
-            goalReached = True
-            break  # go out the if
-        for i in problem.getSuccessors(xy):  # elke successor van xy -> huidige positie
-            if i[0] not in alreadyVisited.keys():  # kijken of het niet eerder bezocht is
-                totalCost = cost + i[2]
-                if not(i[0] in mazecost.keys() and mazecost[i[0]] <= totalCost):
-                    mazecost[i[0]] = totalCost
-                    mazepath[i[0]] = xy
-                    StatePQ.push((i[0], i[1], totalCost), totalCost)  # push de xy, dir, totalcost op de stack
-
-    while nextstep in mazepath.keys():  # follow the path
-        goal.append(alreadyVisited[nextstep])
-        currentStep = mazepath[nextstep]  # set a new currentstep
-        nextstep = currentStep
-    goal.reverse()
-    return goal
+    states = util.PriorityQueue()
+    states.push((StatePQ, []) ,0)
+    while not states.isEmpty():
+        xy, direcetion = states.pop()
+        if problem.isGoalState(xy):
+            return direcetion
+        if xy not in Goal:
+            successors = problem.getSuccessors(xy)
+            for succ in successors:
+                Sates = succ[0]
+                if Sates not in Goal:
+                    directions = succ[1]
+                    newCost = direcetion + [directions]
+                    states.push((Sates, direcetion + [directions]), problem.getCostOfActions(newCost))
+            Goal.append(xy)
+    return direcetion
+    util.raiseNotDefined()
 
 
 def nullHeuristic(state, problem=None):
