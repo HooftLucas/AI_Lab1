@@ -295,13 +295,15 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        return self.startState
+        return (self.startingPosition, self.corners)
+
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        node, unvisitedCorners = state
+        return unvisitedCorners == (node, )
 
     def getSuccessors(self, state):
         """
@@ -314,6 +316,7 @@ class CornersProblem(search.SearchProblem):
             is the incremental cost of expanding to that successor
         """
 
+        node, unvisitedCorners = state
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
@@ -324,6 +327,17 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
+            x,y = node
+            dx, dy = Actions.directionToVector(action)
+            nx, ny = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nx][ny]
+
+            if hitsWall:
+                continue
+
+            nnode = (nx, ny)
+            nunvisitedCorners = tuple(c for c in unvisitedCorners if c != node)
+            successors.append(((nnode, nunvisitedCorners), action, 1))
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -359,7 +373,18 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    node, unvisitedCorners = state
+    unvisitedCorners = list(unvisitedCorners)
+
+    # distfn = lambda p,q : ((p[0] - q[0])**2 + (p[1] - q[1])**2)** .5
+    distfn = util.manhattanDistance
+    totalDist = 0
+    while len(unvisitedCorners):
+        dist, c = min([(distfn(node, c), c) for c in unvisitedCorners])
+        totalDist += dist
+        node = c
+        unvisitedCorners.remove(c)
+    return totalDist
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"

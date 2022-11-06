@@ -75,10 +75,10 @@ class Grades:
 
       if self.mute: util.mutePrint()
       try:
-        util.TimeoutFunction(getattr(gradingModule, q),1800)(self) # Call the question's function
+#        util.TimeoutFunction(getattr(gradingModule, q),1800)(self) # Call the question's function
         #TimeoutFunction(getattr(gradingModule, q),1200)(self) # Call the question's function
-      except Exception as inst:
-        self.addExceptionMessage(q, inst, traceback)
+#      except Exception as inst:
+#        self.addExceptionMessage(q, inst, traceback)
         self.addErrorHints(exceptionMap, inst, q[1])
       except:
         self.fail('FAIL: Terminated with a string exception.')
@@ -146,7 +146,7 @@ to follow your instructor's guidelines to receive credit on your project.
     Method to format the exception message, this is more complicated because
     we need to cgi.escape the traceback but wrap the exception in a <pre> tag
     """
-    self.fail('FAIL: Exception raised: %s' % inst)
+#    self.fail('FAIL: Exception raised: %s' % inst)
     self.addMessage('')
     for line in traceback.format_exc().split('\n'):
         self.addMessage(line)
@@ -269,7 +269,7 @@ to follow your instructor's guidelines to receive credit on your project.
     "Sets sanity check bit to false and outputs a message"
     self.sane = False
     self.assignZeroCredit()
-    self.addMessage(message, raw)
+#    self.addMessage(message, raw)
 
   def assignZeroCredit(self):
     self.points[self.currentQuestion] = 0
@@ -291,7 +291,7 @@ to follow your instructor's guidelines to receive credit on your project.
         if self.mute: util.unmutePrint()
         print('*** ' + message)
         if self.mute: util.mutePrint()
-        message = cgi.escape(message)
+        #message = cgi.escape(message)
     self.messages[self.currentQuestion].append(message)
 
   def addMessageToEmail(self, message):

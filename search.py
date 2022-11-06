@@ -176,7 +176,7 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of the least total cost first."""
     "*** YOUR CODE HERE ***"
-    goal: list = []  # list
+    goal: list = []
     goalReached = False
     StatePQ = util.PriorityQueue()  # queue heeft de maze ((x,y), direction, cost), priority)
     alreadyVisited = {}  # kijken welke (xy) al bezocht zijn
@@ -189,13 +189,15 @@ def uniformCostSearch(problem):
         alreadyVisited[xy] = dir  # set the direction where he was in the list
         if problem.isGoalState(xy):  # control if the destination is the goal
             nextstep = xy
+            goalReached = True
             break  # go out the if
         for i in problem.getSuccessors(xy):  # elke successor van xy -> huidige positie
             if i[0] not in alreadyVisited.keys():  # kijken of het niet eerder bezocht is
                 totalCost = cost + i[2]
-                mazecost[i[0]] = totalCost
-                mazepath[i[0]] = xy
-                StatePQ.push((i[0], i[1], totalCost), totalCost)  # push de xy, dir, totalcost op de stack
+                if not(i[0] in mazecost.keys() and mazecost[i[0]] <= totalCost):
+                    mazecost[i[0]] = totalCost
+                    mazepath[i[0]] = xy
+                    StatePQ.push((i[0], i[1], totalCost), totalCost)  # push de xy, dir, totalcost op de stack
 
     while nextstep in mazepath.keys():  # follow the path
         goal.append(alreadyVisited[nextstep])
