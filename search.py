@@ -89,88 +89,70 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    # Abbreviating Directions
-    from game import Directions
-    # NORTH, EAST, SOUTH, WEST, STOP, LEFT, REVERSE, RIGHT
-    n = Directions.NORTH
-    e = Directions.EAST
-    s = Directions.SOUTH
-    w = Directions.WEST
-
-    """
-    Solving Problem
-    """
-    # ((5, 4), 'South', 1),
-    solved: bool = False
-    visitedNodes: list = []
+    visitedStates = []
     pathMap = {}  # For each state, store the parent
-    solvedPath = []
+    solvedPath = []  # Return
 
-    currentState = problem.getStartState()  # Get The Starting state
-    queue = util.Stack()  # Define Queue
-    queue.push(currentState)
+    currentState = problem.getStartState()
+    queue = util.Stack()  # Last-In-First-Out
 
-    while not solved:
-        # 1) Take top off
+    while not problem.isGoalState(currentState):
+        # 1) Goal state is not current state, so, explore child nodes, push back to queue
+        allNeighbours = problem.getSuccessors(currentState)  # Get Succesors
+        for neighbourState in allNeighbours:  # Loop through neighbours
+            if neighbourState[0] not in visitedStates:  # Prevents visiting nodes that already have been visited
+                queue.push(neighbourState[0])
+                pathMap[neighbourState[0]] = currentState, neighbourState[1]  # For each state (key) stores which is the parent and which is the direction parent->child
+
+        # 1) Take top off, scream if the queue is empty (this should never happen if the maze is solvable)
         if queue.isEmpty():
-            raise "fuck"
+            raise "DFS: Start and end point are not connected"
         else:
-            currentState = queue.pop()
-            visitedNodes.push(currentState)
-
-        # 2) If current
-        if problem.isGoalState(currentState):
-            solved = True
-
-            currentChild = currentState
-            while currentChild is not None:
-                solved.push(currentChild[2])
-                currentChild = pathMap[currentChild]
-
-
-
-        # 3) Explore nodes, push back to queue
-        else:
-            allNeighbours = problem.getSuccesorStates(currentState)  # Get Succesors
-            for state in allNeighbours:  # Loop and push
-                if state not in visitedStates:  # Prevents visiting nodes that already have been visited
-                    queue.push(state)
-                    parentMap[state] = currentState
+            currentState = queue.pop()  # Returns (x, y)
+            visitedStates.append(currentState)  # Adds current state to already visited states
 
     # Return List Initialization
+    currentChild = currentState, ""
+    while currentChild[0] is not problem.getStartState():
+        currentChild = pathMap[currentChild[0]]
+        solvedPath.append(currentChild[1])
+
+    solvedPath.reverse()
     return solvedPath
 
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    goal: list = []
-    goalReached = False
-    stateQueue = util.Queue()  # we geven de state queue de maze ((x,y), dir, cost)
-    alreadyVisited = {}  # we zetten de bezochte posities hierin
-    mazePath = {}  # kijkt naar hoe routes gelinkt zijn aan de positie
-    nextstep = 0
-    stateQueue.push(problem.getStartState(), '')
+    visitedStates = []
+    pathMap = {}  # For each state, store the parent
+    solvedPath = []  # Return
 
-    while not goalReached:
-        xy, direction = stateQueue.pop()
-        alreadyVisited[xy] = direction  # xy krijgt de directie die genomen is
-        if problem.isGoalState(xy):  # controle of het doel bereikt is
-            nextstep = xy
-            goalReached = True
-            break  # go out the if
-        for i in problem.getSuccessors(xy):  # voor elke successor van xy, dus de huidige positie
-            # gaan elke successor af die nog niet bezocht is en nog niet in de queue staat
-            if i[0] not in alreadyVisited.keys() and i[0] not in (j[0] for j in stateQueue.list):
-                mazePath[i[0]] = xy  # gaan het pad van de huidige positie naar de succesor zetten
-                stateQueue.push((i[0], i[1]))  # voeg de successor aan de stack
+    currentState = problem.getStartState()
+    queue = util.Queue()  # First-In-First-Out
 
-    while nextstep in mazePath.keys():  # follow the path
-        goal.append(alreadyVisited[nextstep])
-        currentStep = mazePath[nextstep]  # set a new currentstep
-        nextstep = currentStep  # nodig om deze lijst te reversen voor een juiste lijst te krijgen
-    goal.reverse()
-    return goal
+    while not problem.isGoalState(currentState):
+        # 1) Goal state is not current state, so, explore child nodes, push back to queue
+        allNeighbours = problem.getSuccessors(currentState)  # Get Succesors
+        for neighbourState in allNeighbours:  # Loop through neighbours
+            if neighbourState[0] not in visitedStates:  # Prevents visiting nodes that already have been visited
+                queue.push(neighbourState[0])
+                pathMap[neighbourState[0]] = currentState, neighbourState[1]  # For each state (key) stores which is the parent and which is the direction parent->child
+
+        # 1) Take top off, scream if the queue is empty
+        if queue.isEmpty():
+            raise "BFS: Start and end point are not connected"
+        else:
+            currentState = queue.pop()  # Returns (x, y)
+            visitedStates.append(currentState)  # Adds current state to already visited states
+
+    # Return List Initialization
+    currentChild = currentState, ""
+    while currentChild[0] is not problem.getStartState():
+        currentChild = pathMap[currentChild[0]]
+        solvedPath.append(currentChild[1])
+
+    solvedPath.reverse()
+    return solvedPath
 
 
 def uniformCostSearch(problem):
