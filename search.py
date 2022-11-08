@@ -158,26 +158,8 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of the least total cost first."""
     "*** YOUR CODE HERE ***"
-    StatePQ = problem.getStartState()
-    Goal: list = []
-    goalReached = False
-    states = util.PriorityQueue()
-    states.push((StatePQ, []) ,0)
-    while not states.isEmpty():
-        xy, direcetion = states.pop()
-        if problem.isGoalState(xy):
-            return direcetion
-        if xy not in Goal:
-            successors = problem.getSuccessors(xy)
-            for succ in successors:
-                Sates = succ[0]
-                if Sates not in Goal:
-                    directions = succ[1]
-                    newCost = direcetion + [directions]
-                    states.push((Sates, direcetion + [directions]), problem.getCostOfActions(newCost))
-            Goal.append(xy)
-    return direcetion
-    util.raiseNotDefined()
+    # astar with h(x) = 0 == ucs
+    return aStarSearch(problem, heuristic=nullHeuristic, costDependent=True)
 
 
 def nullHeuristic(state, problem=None):
@@ -188,38 +170,35 @@ def nullHeuristic(state, problem=None):
     return 0
 
 
-def aStarSearch(problem, heuristic=nullHeuristic):
+def aStarSearch(problem, heuristic=nullHeuristic, costDependent=True):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    goal: list = []
-    goalReached = False
-    StatePQ = util.PriorityQueue() #queue has maze((x,y), dir, cost)
-    alreadyVisited = {} #it knows the visited route
-    mazePath = {}
-    mazeCost = {}
-    nextStep = 0
-    StatePQ.push((problem.getStartState(), ' ', 0), 0)
-    while not goalReached:
-        xy, dir, cost = StatePQ.pop()
-        alreadyVisited[xy] = dir #xy get the next direction
-        if problem.isGoalState(xy): #this position is the goal
-            nextStep = xy #this is the position this moment
-            goalReached = True
-            break
-        for i in problem.getSuccessors(xy): #for every succesor xy
-            if i[0] not in alreadyVisited.keys(): #this position is not visited: i[0] is (x,y) of succesor
-                totalcost = cost +i[2] #totalcost is the sum of the all costes
-                heuristicCost = totalcost + heuristic(i[0], problem) # heuristic + totalcost by A*
-                if not (i[0] in mazeCost.keys() and mazeCost[i[0]] <= totalcost):
-                    mazeCost[i[0]] = totalcost #cost to get to the goalpoint
-                    mazePath[i[0]] = xy # moment point to get to the succesor
-                    StatePQ.push((i[0],i[1],totalcost), heuristicCost) # push xy, dir and totalcost on the stack
-    while nextStep in mazePath.keys(): #follow the path
-        goal.append(alreadyVisited[nextStep]) #put the action (NWSE) to get the goal list
-        currentStep = mazePath[nextStep] #get currstep out of the succesor
-        nextStep = currentStep
-    goal.reverse() #reverse to get the right sequence
-    return goal
+    paths = util.Queue()
+    visited = []
+    start = (problem.getStartState(), [])
+    paths.push(start)
+
+    if costDependent:
+        paths = util.PriorityQueue()
+        costs = util.Counter()
+        costs[str(start[0])] += heuristic(start[0], problem)
+        paths.push(start, costs[str(start[0])])
+
+    while not paths.isEmpty():
+        node, path = paths.pop()
+
+        if problem.isGoalState(node):
+            return path
+
+        if not node in visited:
+            visited.append(node)
+            for nnode, move, cost in problem.getSuccessors(node):
+                if not costDependent:
+                    paths.push((nnode, path + [move]))
+                    continue
+                costs[str(nnode)] = costs[str(node)] - heuristic(node, problem)
+                costs[str(nnode)] += cost + heuristic(nnode, problem)
+                paths.push((nnode, path + [move]), costs[str(nnode)])
 # Abbreviations
 bfs = breadthFirstSearch
 dfs = depthFirstSearch
