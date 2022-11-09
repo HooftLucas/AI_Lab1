@@ -19,7 +19,6 @@ Pacman agents (in searchAgents.py).
 
 import util
 
-
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -32,7 +31,6 @@ class SearchProblem:
         """
         Returns the start state for the search problem.
         """
-
         util.raiseNotDefined()
 
     def isGoalState(self, state):
@@ -72,8 +70,7 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return [s, s, w, s, w, w, s, w]
-
+    return  [s, s, w, s, w, w, s, w]
 
 def depthFirstSearch(problem):
     """
@@ -89,78 +86,42 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    visitedStates = []
-    pathMap = {}  # For each state, store the parent
-    solvedPath = []  # Return
+    "*** YOUR CODE HERE ***"
+    # each item in the stack will consist:
+    #   [node, action to reach next node, successors of node]
+    path = util.Stack()
+    current = [problem.getStartState(), '', ()]
+    visited = [current[0]]
 
-    currentState = problem.getStartState()
-    queue = util.Stack()  # Last-In-First-Out
+    while not problem.isGoalState(current[0]):
+        if not len(current[2]):
+            current[2] = tuple(problem.getSuccessors(current[0]))
 
-    while not problem.isGoalState(currentState):
-        # 1) Goal state is not current state, so, explore child nodes, push back to queue
-        allNeighbours = problem.getSuccessors(currentState)  # Get Succesors
-        for neighbourState in allNeighbours:  # Loop through neighbours
-            if neighbourState[0] not in visitedStates:  # Prevents visiting nodes that already have been visited
-                queue.push(neighbourState[0])
-                pathMap[neighbourState[0]] = currentState, neighbourState[1]  # For each state (key) stores which is the parent and which is the direction parent->child
+        for node, move, cost in reversed(current[2]):
+            if node not in visited:
+                current[1] = move
+                path.push(current)
+                visited.append(node)
+                path.push([node, '', ()])
+                break
 
-        # 1) Take top off, scream if the queue is empty (this should never happen if the maze is solvable)
-        if queue.isEmpty():
-            raise "DFS: Start and end point are not connected"
-        else:
-            currentState = queue.pop()  # Returns (x, y)
-            visitedStates.append(currentState)  # Adds current state to already visited states
+        if path.isEmpty():
+            return
+        current = path.pop()
 
-    # Return List Initialization
-    currentChild = currentState, ""
-    while currentChild[0] is not problem.getStartState():
-        currentChild = pathMap[currentChild[0]]
-        solvedPath.append(currentChild[1])
-
-    solvedPath.reverse()
-    return solvedPath
-
+    return [x[1] for x in path.list]
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    visitedStates = []
-    pathMap = {}  # For each state, store the parent
-    solvedPath = []  # Return
-
-    currentState = problem.getStartState()
-    queue = util.Queue()  # First-In-First-Out
-
-    while not problem.isGoalState(currentState):
-        # 1) Goal state is not current state, so, explore child nodes, push back to queue
-        allNeighbours = problem.getSuccessors(currentState)  # Get Succesors
-        for neighbourState in allNeighbours:  # Loop through neighbours
-            if neighbourState[0] not in visitedStates:  # Prevents visiting nodes that already have been visited
-                queue.push(neighbourState[0])
-                pathMap[neighbourState[0]] = currentState, neighbourState[1]  # For each state (key) stores which is the parent and which is the direction parent->child
-
-        # 1) Take top off, scream if the queue is empty
-        if queue.isEmpty():
-            raise "BFS: Start and end point are not connected"
-        else:
-            currentState = queue.pop()  # Returns (x, y)
-            visitedStates.append(currentState)  # Adds current state to already visited states
-
-    # Return List Initialization
-    currentChild = currentState, ""
-    while currentChild[0] is not problem.getStartState():
-        currentChild = pathMap[currentChild[0]]
-        solvedPath.append(currentChild[1])
-
-    solvedPath.reverse()
-    return solvedPath
-
+    "*** YOUR CODE HERE ***"
+    # astar without taking cost into account == bfs
+    return aStarSearch(problem, costDependent=False)
 
 def uniformCostSearch(problem):
-    """Search the node of the least total cost first."""
+    """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
     # astar with h(x) = 0 == ucs
     return aStarSearch(problem, heuristic=nullHeuristic, costDependent=True)
-
 
 def nullHeuristic(state, problem=None):
     """
@@ -169,10 +130,12 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
-
 def aStarSearch(problem, heuristic=nullHeuristic, costDependent=True):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+    # paths will consist:
+    #   [node, actions to reach node]
+    # paths will use a PriorityQueue if cost dependent else a Queue
     paths = util.Queue()
     visited = []
     start = (problem.getStartState(), [])
@@ -199,6 +162,7 @@ def aStarSearch(problem, heuristic=nullHeuristic, costDependent=True):
                 costs[str(nnode)] = costs[str(node)] - heuristic(node, problem)
                 costs[str(nnode)] += cost + heuristic(nnode, problem)
                 paths.push((nnode, path + [move]), costs[str(nnode)])
+
 # Abbreviations
 bfs = breadthFirstSearch
 dfs = depthFirstSearch
